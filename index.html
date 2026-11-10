@@ -1,0 +1,237 @@
+<title>AURA · Prototipo V2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: panel de control arriba, teléfono con el chat a la izquierda y planilla de Auraluxe a la derecha; en celular se apilan */
+:root{
+  --bg:#F3F2F0; --surface:#FFFFFF; --ink:#1E1C1B; --muted:#6E6966; --line:#E2DEDA;
+  --red:#D7261E; --red-soft:#FBE4E2; --chat:#ECE8E3; --in:#DDF1D7; --ok:#2E7D4F; --warn:#B26A00;
+  --font-ui:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display:"Space Grotesk", "Manrope", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#161413; --surface:#211E1D; --ink:#F2EEEB; --muted:#A8A19C; --line:#38322F;
+  --red:#F0483F; --red-soft:#3A1F1D; --chat:#1A1817; --in:#23402A; --ok:#5CC98A; --warn:#E3A44A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#161413; --surface:#211E1D; --ink:#F2EEEB; --muted:#A8A19C; --line:#38322F;
+  --red:#F0483F; --red-soft:#3A1F1D; --chat:#1A1817; --in:#23402A; --ok:#5CC98A; --warn:#E3A44A; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:15px;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:18px}
+header.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+.brand h1{font-family:var(--font-display);font-size:30px;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.brand p{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--red);margin-bottom:6px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:transparent;color:var(--muted);font:600 13px var(--font-ui);padding:7px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.btn-ghost{border:1px solid var(--line);background:var(--surface);color:var(--ink);font:600 13px var(--font-ui);padding:7px 12px;border-radius:999px;cursor:pointer}
+button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.grid{display:grid;grid-template-columns:400px minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:880px){.grid{grid-template-columns:minmax(0,1fr)}}
+/* Teléfono */
+.phone{background:var(--ink);border-radius:34px;padding:10px;max-width:400px;width:100%;margin:0 auto}
+.screen{background:var(--chat);border-radius:26px;overflow:hidden;display:flex;flex-direction:column;height:680px;max-height:78vh}
+.chat-head{display:flex;gap:10px;align-items:center;padding:12px 14px;background:var(--surface);border-bottom:1px solid var(--line)}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font:700 14px var(--font-display)}
+.chat-head b{display:block;font-size:15px}
+.chat-head small{color:var(--muted)}
+.human{margin-left:auto;border:1px solid var(--red);color:var(--red);background:transparent;font:700 12px var(--font-ui);padding:6px 10px;border-radius:999px;cursor:pointer}
+.msgs{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:8px}
+.m{max-width:86%;padding:9px 12px;border-radius:14px;font-size:14px;box-shadow:0 1px 0 rgba(0,0,0,.06)}
+.m.bot{align-self:flex-start;background:var(--surface);border-top-left-radius:4px}
+.m.me{align-self:flex-end;background:var(--in);border-top-right-radius:4px}
+.m .t{display:block;font-size:11px;color:var(--muted);text-align:right;margin-top:3px}
+.m.sys{align-self:center;background:transparent;box-shadow:none;color:var(--muted);font-size:12px;text-align:center;max-width:95%}
+.note{font-size:12px;color:var(--warn);display:block;margin-top:4px}
+.car{display:grid;grid-template-columns:62px minmax(0,1fr);gap:10px;align-items:center;border-top:1px solid var(--line);padding-top:8px;margin-top:8px}
+.car:first-of-type{border-top:0;margin-top:4px}
+.car .ic{width:62px;height:44px;border-radius:8px;background:var(--red-soft);display:grid;place-items:center;font:700 12px var(--font-display);color:var(--red)}
+.car b{font-size:14px}
+.car small{display:block;color:var(--muted)}
+.chip-eco{display:inline-block;font-size:10px;font-weight:700;color:var(--ok);border:1px solid var(--ok);border-radius:999px;padding:0 6px;margin-left:4px}
+.quick{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;background:var(--surface);border-top:1px solid var(--line)}
+.quick button{border:1px solid var(--red);background:transparent;color:var(--red);font:600 13px var(--font-ui);padding:7px 11px;border-radius:999px;cursor:pointer}
+.quick button.primary{background:var(--red);color:#fff}
+/* Panel Auraluxe */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel h2{font-family:var(--font-display);font-size:19px;margin:0}
+.panel .sub{color:var(--muted);font-size:13px;margin-top:2px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:10px}
+.kpi b{display:block;font:700 22px var(--font-display);font-variant-numeric:tabular-nums}
+.kpi span{font-size:12px;color:var(--muted)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:13px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+td{font-variant-numeric:tabular-nums}
+tr.new td{background:var(--red-soft)}
+.pill{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;border:1px solid currentColor}
+.p-nuevo{color:var(--muted)} .p-int{color:var(--warn)} .p-cita{color:var(--ok)} .p-der{color:var(--red)}
+.summary{background:var(--bg);border-radius:12px;padding:12px 14px;font-size:13px}
+.summary b{font-family:var(--font-display)}
+.legend{font-size:12px;color:var(--muted)}
+.changes{display:flex;flex-wrap:wrap;gap:6px}
+.changes span{font-size:12px;border:1px dashed var(--line);border-radius:999px;padding:3px 9px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.m{animation:pop .18s ease-out}@keyframes pop{from{transform:translateY(4px);opacity:.4}to{transform:none;opacity:1}}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="tag">Prototipo V2 · Grupo 2 · Auraluxe Automotriz, Copiapó</span>
+      <h1>AURA, el conserje digital 24/7</h1>
+      <p>Simulación del asistente de WhatsApp con los ajustes de la Matriz CDM. Todo lo que se escribe aquí es de ejemplo: autos, precios y cuotas son referenciales.</p>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Canal de entrada">
+        <button id="ch-wa" aria-pressed="true" data-ch="WhatsApp">WhatsApp</button>
+        <button id="ch-ig" aria-pressed="false" data-ch="Instagram">Instagram</button>
+        <button id="ch-mk" aria-pressed="false" data-ch="Marketplace">Marketplace</button>
+      </div>
+      <div class="seg" role="group" aria-label="Hora simulada">
+        <button id="h-night" aria-pressed="true" data-h="night">22:40 (fuera de horario)</button>
+        <button id="h-day" aria-pressed="false" data-h="day">11:00</button>
+      </div>
+      <button class="btn-ghost" id="reset">Reiniciar conversación</button>
+    </div>
+  </header>
+
+  <div class="changes" aria-label="Ajustes incorporados desde la Matriz CDM">
+    <span>Renta por rangos</span><span>Aviso de cuota referencial</span><span>Botón "Hablar con una persona"</span><span>Catálogo al día</span><span>Auto en parte de pago</span><span>Consentimiento de datos</span>
+  </div>
+
+  <div class="grid">
+    <div class="phone">
+      <div class="screen">
+        <div class="chat-head">
+          <div class="avatar">A</div>
+          <div><b>Auraluxe Automotriz</b><small id="status">AURA responde al instante</small></div>
+          <button class="human" id="human">Hablar con una persona</button>
+        </div>
+        <div class="msgs" id="msgs" aria-live="polite"></div>
+        <div class="quick" id="quick"></div>
+      </div>
+    </div>
+
+    <section class="panel" aria-label="Panel de Auraluxe">
+      <div>
+        <h2>Panel de Auraluxe</h2>
+        <div class="sub">Lo que ven la dueña y las encargadas: cada consulta queda registrada sola.</div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><b id="k-total">3</b><span>consultas hoy</span></div>
+        <div class="kpi"><b id="k-time">&lt; 1 min</b><span>1ª respuesta promedio</span></div>
+        <div class="kpi"><b id="k-reg">100%</b><span>consultas registradas</span></div>
+        <div class="kpi"><b id="k-cita">1</b><span>visitas agendadas</span></div>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Hora</th><th>Canal</th><th>Cliente</th><th>Auto</th><th>Pie / renta</th><th>Etapa</th><th>Consentimiento</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div class="summary" id="summary"></div>
+      <p class="legend">Prototipo para testeo. En la versión real, el chat funciona en WhatsApp (con Instagram y Marketplace redirigiendo al mismo chat) y el registro es una planilla de Google Sheets.</p>
+    </section>
+  </div>
+</div>
+
+<script>
+const CARS = [
+  {id:"rav4", short:"RAV4", name:"Toyota RAV4 2019", km:"78.000 km", price:18490000, fuel:"Bencina · 12 km/l"},
+  {id:"l200", short:"L200", name:"Mitsubishi L200 2020 4x4", km:"95.000 km", price:16990000, fuel:"Diésel · 11 km/l"},
+  {id:"cc", short:"C. Cross", name:"Toyota Corolla Cross Hybrid 2022", km:"41.000 km", price:19990000, fuel:"Híbrido · 21 km/l", eco:true},
+  {id:"swift", short:"Swift", name:"Suzuki Swift 2021", km:"52.000 km", price:9990000, fuel:"Bencina · 17 km/l"},
+];
+const RANGES = [
+  {id:"r1", label:"Menos de $800 mil", base:600000},
+  {id:"r2", label:"$800 mil a $1,5 millones", base:800000},
+  {id:"r3", label:"Más de $1,5 millones", base:1500000},
+];
+const PIES = [2000000, 4000000, 6000000];
+const RATE = 0.016; // tasa mensual referencial
+const clp = n => "$" + Math.round(n).toLocaleString("es-CL");
+const st = {channel:"WhatsApp", night:true, car:null, range:null, pie:null, consent:null, rowId:null, clock:[22,40]};
+const seed = [
+  {h:"21:15", ch:"Instagram", who:"Jorge", car:"Mitsubishi L200 2020 4x4", fin:"—", stage:"int", consent:"Sí"},
+  {h:"20:02", ch:"WhatsApp", who:"Paula", car:"Suzuki Swift 2021", fin:"—", stage:"nuevo", consent:"Sí"},
+  {h:"19:31", ch:"Marketplace", who:"Rodrigo", car:"Toyota RAV4 2019", fin:"$4 M / $800 mil a $1,5 M", stage:"cita", consent:"Sí"},
+];
+let rows = [];
+const $ = id => document.getElementById(id);
+const stageLabel = {nuevo:["Nuevo","p-nuevo"], int:["Interesado","p-int"], cita:["Cita","p-cita"], der:["Derivado","p-der"]};
+
+function now(){ const [h,m]=st.clock; st.clock=[h, m+1>59?0:m+1]; return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0"); }
+function msg(who, html){ const d=document.createElement("div"); d.className="m "+who; d.innerHTML = html + (who==="sys"?"":`<span class="t">${now()}</span>`); $("msgs").appendChild(d); $("msgs").scrollTop=$("msgs").scrollHeight; }
+function quick(btns){ const q=$("quick"); q.innerHTML=""; btns.forEach(([label,fn,primary])=>{ const b=document.createElement("button"); b.textContent=label; if(primary) b.className="primary"; b.addEventListener("click",()=>{ msg("me", label); fn(); }); q.appendChild(b); }); }
+function say(html, btns, delay=350){ setTimeout(()=>{ msg("bot", html); if(btns) quick(btns); }, delay); }
+
+function upsertRow(patch){
+  if(st.rowId===null){ st.rowId = Date.now(); rows.unshift({id:st.rowId, h:(st.night?"22:40":"11:00"), ch:st.channel, who:"Camila", car:"—", fin:"—", stage:"nuevo", consent:"Pendiente", isNew:true}); }
+  Object.assign(rows.find(r=>r.id===st.rowId), patch); render();
+}
+function render(){
+  $("rows").innerHTML = rows.map(r=>{ const [l,c]=stageLabel[r.stage]; return `<tr class="${r.isNew?"new":""}"><td>${r.h}</td><td>${r.ch}</td><td>${r.who}</td><td>${r.car}</td><td>${r.fin}</td><td><span class="pill ${c}">${l}</span></td><td>${r.consent}</td></tr>`; }).join("");
+  $("k-total").textContent = rows.length;
+  $("k-cita").textContent = rows.filter(r=>r.stage==="cita").length;
+  const ready = rows.filter(r=>r.stage==="cita"||r.stage==="der");
+  $("summary").innerHTML = `<b>Resumen de las 8:30 para la dueña</b><br>Anoche llegaron ${rows.length} consultas. ${ready.length} cliente${ready.length===1?"":"s"} listo${ready.length===1?"":"s"} para atender: ${ready.map(r=>r.who+" ("+r.car.split(" ").slice(0,2).join(" ")+", "+stageLabel[r.stage][0].toLowerCase()+")").join(", ")||"ninguno"}.`;
+}
+
+function start(){
+  $("msgs").innerHTML=""; st.car=st.range=st.pie=st.consent=null; st.rowId=null; st.clock = st.night?[22,40]:[11,0];
+  rows = seed.map((r,i)=>({...r, id:i}));
+  render();
+  msg("sys", `Camila escribe por ${st.channel}${st.night?" a las 22:40, con el local cerrado":""}`);
+  msg("me", "Hola! ¿Tienen camionetas o SUV? ¿Qué precios?");
+  upsertRow({});
+  say(`¡Hola! Soy AURA, la asistente de Auraluxe Automotriz 🚗<br>Antes de seguir: ¿me autorizas a guardar tu nombre y tu consulta para atenderte mejor? Solo los usa Auraluxe y puedes pedir que los borremos cuando quieras.<span class="note">Ley 21.719 de protección de datos</span>`,
+    [["Sí, acepto", ()=>{ st.consent="Sí"; upsertRow({consent:"Sí"}); menu(); }, true], ["No, gracias", ()=>{ st.consent="No"; upsertRow({consent:"No"}); say("Sin problema. Te respondo igual, pero no guardaré tus datos. ¿Qué te gustaría ver?", mainBtns()); }]]);
+}
+function mainBtns(){ return [["Ver autos disponibles", cars, true], ["Simular crédito", credit], ["Tengo un auto para dejar en parte de pago", tradeIn], ["Agendar visita", schedule]]; }
+function menu(){ say("¡Gracias! ¿En qué te ayudo?", mainBtns()); }
+function cars(){
+  const list = CARS.map(c=>`<div class="car"><div class="ic">${c.short}</div><div><b>${c.name}</b>${c.eco?'<span class="chip-eco">Eficiente</span>':""}<small>${c.km} · ${c.fuel}</small><small>${clp(c.price)} <i>(referencial)</i></small></div></div>`).join("");
+  say(`Estos son los autos disponibles hoy (catálogo actualizado a las 8:30):${list}`, CARS.map(c=>[c.name.split(" ").slice(0,2).join(" "), ()=>pick(c)]));
+}
+function pick(c){
+  st.car=c; upsertRow({car:c.name, stage:"int"});
+  say(`Buena elección. <b>${c.name}</b>: ${c.km}, ${c.fuel}. Precio ${clp(c.price)} (referencial). Tiene revisión técnica al día y se puede ver en el local de Diego de Almeida.`,
+    [["Simular crédito", credit, true], ["Agendar prueba de manejo", schedule], ["Ver otros autos", cars]]);
+}
+function credit(){
+  if(!st.car){ st.car=CARS[0]; upsertRow({car:st.car.name, stage:"int"}); }
+  say(`Te ayudo con una simulación para el <b>${st.car.name}</b>. ¿En qué rango está tu renta líquida mensual? No necesito el monto exacto.`, RANGES.map(r=>[r.label, ()=>{ st.range=r; askPie(); }]));
+}
+function askPie(){ say("¿Con cuánto pie cuentas, más o menos?", PIES.map(p=>[clp(p), ()=>{ st.pie=p; simulate(); }])); }
+function simulate(){
+  const n=48, P=st.car.price-st.pie, cuota = P*RATE/(1-Math.pow(1+RATE,-n));
+  const ok = cuota <= st.range.base*0.35;
+  upsertRow({fin:`${clp(st.pie).replace(".000.000"," M")} / ${st.range.label.replace(" millones"," M").replace(" mil"," mil")}`, stage:"int"});
+  say(`Cuota referencial: <b>${clp(cuota)}</b> al mes en 48 cuotas, con ${clp(st.pie)} de pie.<span class="note">Es una cuota referencial, sujeta a evaluación. No es una aprobación de crédito.</span>${ok?"<br>Según tu rango de renta, cumples los requisitos básicos ✅":"<br>Con ese rango, la cuota podría ser alta. Una ejecutiva puede revisar otras opciones contigo (más pie o más cuotas)."}`,
+    [["Agendar visita", schedule, true], ["Hablar con una persona", human], ["Ver otros autos", cars]]);
+}
+function schedule(){
+  say("¿Qué día te acomoda para ver el auto en el local?", [["Sábado 11:00", ()=>book("sábado 11:00")], ["Lunes 18:30", ()=>book("lunes 18:30")], ["Martes 12:00", ()=>book("martes 12:00")]]);
+}
+function book(slot){
+  upsertRow({stage:"cita", car: st.car?st.car.name:"Por definir"});
+  say(`¡Listo! Te esperamos el <b>${slot}</b> en Diego de Almeida, Copiapó 📅 Te mando un recordatorio el día anterior. La ejecutiva ya tendrá tu ficha, así que no tendrás que repetir nada.`, [["Hablar con una persona", human], ["Volver al inicio", menu]]);
+}
+function tradeIn(){
+  say("¡Perfecto! Envíame 3 fotos de tu auto (frente, costado e interior) y dime el año y kilometraje. Una ejecutiva lo revisa y te da una tasación referencial.", [["📷 Enviar fotos (simulado)", ()=>{ upsertRow({stage:"der", car:(st.car?st.car.name:"Parte de pago")}); say("Recibí tus fotos. Le pasé tu caso a una ejecutiva con un resumen; te contactará "+(st.night?"mañana a las 9:30":"durante la próxima hora")+".", mainBtns()); }, true]]);
+}
+function human(){
+  upsertRow({stage:"der"});
+  say(`Le aviso a una ejecutiva de inmediato y le dejo un resumen de tu conversación 👩‍💼<br>${st.night?"El local abre a las 9:00: te contactará mañana a las <b>9:30</b>.":"Te contactará en los próximos <b>15 minutos</b>."}`, [["Volver al inicio", menu]]);
+}
+$("human").addEventListener("click", ()=>{ msg("me","Quiero hablar con una persona"); human(); });
+$("reset").addEventListener("click", start);
+document.querySelectorAll("[data-ch]").forEach(b=>b.addEventListener("click",()=>{ document.querySelectorAll("[data-ch]").forEach(x=>x.setAttribute("aria-pressed", x===b)); st.channel=b.dataset.ch; start(); }));
+document.querySelectorAll("[data-h]").forEach(b=>b.addEventListener("click",()=>{ document.querySelectorAll("[data-h]").forEach(x=>x.setAttribute("aria-pressed", x===b)); st.night=b.dataset.h==="night"; $("status").textContent = st.night?"AURA responde al instante":"AURA y el equipo en línea"; start(); }));
+start();
+</script>
